@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>润雅水晶内部报价计算器</title>
+  <style>
+    :root {
+      --background: #fbfaf7;
+      --ink: #27231d;
+      --muted: #746d62;
+      --line: #e2d9ca;
+      --soft: #f5f0e8;
+      --gold: #b08a42;
+      --gold-dark: #755c2b;
+      --gray: #ebe9e4;
+      --panel: #fff;
+      --shadow: 0 22px 60px rgba(77, 61, 35, .11);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--background); }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.9), rgba(245,240,232,.72)),
+        radial-gradient(circle at 85% 10%, rgba(207,187,145,.22), transparent 28%),
+        var(--background);
+      color: var(--ink);
+      font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    h1, h2, h3, p { margin-top: 0; }
+
+    .auth-screen {
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 28px 16px;
+    }
+
+    .auth-panel {
+      width: min(560px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(245,240,232,.78)), #fff;
+      box-shadow: var(--shadow);
+      padding: 30px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--gold-dark);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.06;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 22px;
+    }
+
+    .auth-copy, .auth-note, .notice span, label, .muted {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 14px;
+      margin: 24px 0 8px;
+    }
+
+    .app { display: none; min-height: 100vh; }
+    .app.unlocked { display: block; }
+    .auth-screen.hidden { display: none; }
+
+    .hero-shell, .workspace, .management-grid, .records-section, .quote-detail {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero-shell {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 0 24px;
+    }
+
+    .crystal-aura {
+      position: absolute;
+      inset: 10px 0 auto auto;
+      width: 460px;
+      height: 260px;
+      pointer-events: none;
+      opacity: .58;
+      background:
+        linear-gradient(120deg, transparent 0 22%, rgba(176,138,66,.18) 22% 24%, transparent 24% 100%),
+        linear-gradient(58deg, transparent 0 42%, rgba(218,205,178,.7) 42% 44%, transparent 44% 100%),
+        linear-gradient(146deg, transparent 0 52%, rgba(176,138,66,.12) 52% 54%, transparent 54% 100%);
+      clip-path: polygon(14% 22%, 44% 0, 88% 12%, 100% 58%, 72% 100%, 28% 86%, 0 54%);
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .staff-card, .notice, .calculator-panel, .summary-panel, .utility-panel,
+    .records-section, .quote-detail {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .staff-card {
+      display: grid;
+      gap: 8px;
+      min-width: 230px;
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    .staff-card span, .image-uploader span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .staff-card strong {
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    input, select {
+      min-height: 44px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(176,138,66,.14);
+    }
+
+    .notice {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 28px 0 18px;
+      padding: 16px 18px;
+      border-radius: 8px;
+    }
+
+    .mode-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mode-card {
+      min-height: 112px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(245,240,232,.72)), #fff;
+      color: var(--ink);
+      padding: 18px;
+      text-align: left;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .mode-card:hover, .mode-card.active {
+      border-color: var(--gold);
+      box-shadow: 0 14px 34px rgba(176,138,66,.16);
+      transform: translateY(-2px);
+    }
+
+    .mode-card span {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .mode-card small { color: var(--muted); line-height: 1.55; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr);
+      gap: 18px;
+      align-items: start;
+      margin-top: 10px;
+    }
+
+    .calculator-panel, .summary-panel, .utility-panel, .records-section, .quote-detail {
+      border-radius: 8px;
+      padding: 22px;
+    }
+
+    .panel-heading, .records-toolbar, .detail-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label { display: grid; gap: 8px; font-size: 13px; }
+    .input-with-unit { position: relative; }
+    .input-with-unit input { padding-right: 72px; }
+    .input-with-unit span {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      transform: translateY(-50%);
+    }
+
+    .image-uploader, .bead-panel {
+      display: grid;
+      grid-column: span 2;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(120deg, rgba(255,255,255,.96), rgba(245,240,232,.68)), #fff;
+      padding: 14px;
+    }
+
+    .image-uploader {
+      grid-template-columns: 1fr 132px auto;
+      align-items: center;
+    }
+
+    .image-uploader small { display: block; margin-top: 4px; color: var(--muted); }
+    .image-uploader img, .image-placeholder, .detail-image {
+      width: 132px;
+      height: 92px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--soft);
+    }
+
+    .image-placeholder {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .image-actions { display: grid; gap: 8px; }
+    .upload-button {
+      display: grid;
+      min-height: 40px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--gold-dark);
+      padding: 0 14px;
+      font-weight: 700;
+    }
+    .upload-button input { display: none; }
+
+    .bead-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .bead-head div { display: grid; gap: 4px; }
+    .bead-head span, .bead-head small { color: var(--muted); font-size: 13px; }
+    .bead-head strong { color: var(--ink); }
+
+    .material-list {
+      display: flex;
+      max-height: 132px;
+      flex-wrap: wrap;
+      gap: 8px;
+      overflow: auto;
+      padding: 2px;
+    }
+
+    .material-list button, .template-strip button, .chip {
+      border: 1px solid #dfd3bf;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--gold-dark);
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .material-list button.selected {
+      border-color: var(--gold);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .bead-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .template-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .summary-panel { position: sticky; top: 18px; }
+    .summary-top {
+      padding: 20px;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.86), rgba(245,240,232,.86)),
+        repeating-linear-gradient(45deg, rgba(176,138,66,.13) 0 1px, transparent 1px 16px);
+    }
+
+    .summary-top h2 {
+      margin: 4px 0 8px;
+      color: var(--gold-dark);
+      font-size: 34px;
+    }
+
+    .breakdown {
+      display: grid;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .breakdown div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--gray);
+      padding-bottom: 10px;
+    }
+
+    .breakdown span { color: var(--muted); }
+    .total-line { border-bottom-color: var(--line) !important; }
+    .total-line strong { color: var(--gold-dark); }
+    .total-line.soft strong { color: var(--ink); }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-button, .secondary-button, .ghost-button, .inline-form button,
+    .toolbar-actions button, .row-actions button, .detail-head button,
+    .image-actions button {
+      min-height: 44px;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-weight: 700;
+    }
+
+    .primary-button {
+      border: 1px solid var(--gold);
+      background: linear-gradient(135deg, #b89048, #8a6a32);
+      color: #fff;
+    }
+
+    .secondary-button, .ghost-button, .inline-form button, .toolbar-actions button,
+    .row-actions button, .detail-head button, .image-actions button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--gold-dark);
+    }
+
+    .status-hint { margin: 12px 0 0; color: var(--gold-dark); font-size: 14px; }
+
+    .management-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .inline-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .chips, .employee-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .chip { display: inline-flex; align-items: center; gap: 8px; }
+    .chip button, .employee-list button {
+      border: 0;
+      background: transparent;
+      color: var(--gold-dark);
+      font-weight: 700;
+    }
+
+    .employee-list div {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      border-bottom: 1px solid var(--gray);
+      padding: 8px 0;
+    }
+
+    .employee-list small { color: var(--muted); }
+
+    .records-section { margin-top: 18px; margin-bottom: 22px; }
+    .records-toolbar { align-items: flex-end; }
+    .toolbar-actions {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) auto;
+      gap: 10px;
+    }
+
+    .record-table { overflow: auto; }
+    .record-head, .record-row {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr .9fr .8fr .8fr .55fr 1fr;
+      gap: 12px;
+      align-items: center;
+      min-width: 920px;
+      border-bottom: 1px solid var(--gray);
+      padding: 13px 0;
+    }
+
+    .record-head { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .record-row { color: var(--muted); }
+    .record-row strong { color: var(--ink); }
+    .row-actions { display: flex; gap: 8px; }
+    .row-actions button { min-height: 32px; padding: 0 10px; }
+    .empty-state { display: grid; min-height: 120px; place-items: center; color: var(--muted); }
+
+    .quote-detail { display: none; margin-bottom: 40px; }
+    .quote-detail.active { display: block; }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px 18px;
+      align-items: center;
+    }
+    .detail-grid span { color: var(--muted); }
+    .detail-image { width: 220px; height: 150px; }
+
+    @media (max-width: 860px) {
+      .topbar, .notice, .records-toolbar, .bead-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .mode-grid, .workspace, .management-grid, .form-grid, .bead-inputs,
+      .toolbar-actions, .action-row, .inline-form {
+        grid-template-columns: 1fr;
+      }
+      .summary-panel { position: static; }
+      .image-uploader, .bead-panel { grid-column: span 1; grid-template-columns: 1fr; }
+      .image-uploader img, .image-placeholder { width: 100%; height: 180px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      body * { visibility: hidden; }
+      .print-area, .print-area * { visibility: visible; }
+      .print-area {
+        position: absolute;
+        inset: 0 auto auto 0;
+        display: block !important;
+        width: 100%;
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+      }
+      .detail-head button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main id="authScreen" class="auth-screen">
+    <section class="auth-panel" aria-label="管理员授权">
+      <p class="eyebrow">RUNYA INTERNAL ACCESS</p>
+      <h1>润雅水晶内部报价计算器</h1>
+      <p class="auth-copy">这是国内可上传的静态版，不依赖 ChatGPT 登录或国外接口。继续使用前请输入管理员授权码。</p>
+      <form id="authForm" class="auth-form">
+        <label>管理员授权码
+          <input id="adminCode" autocomplete="current-password" autofocus placeholder="请输入授权码" type="password">
+        </label>
+        <button class="primary-button" type="submit">授权进入</button>
+      </form>
+      <p id="adminHint" class="status-hint"></p>
+      <p class="auth-note">仅限管理员和内部员工使用，请勿外传报价数据。</p>
+    </section>
+  </main>
+
+  <main id="app" class="app">
+    <section class="hero-shell">
+      <div class="crystal-aura" aria-hidden="true"></div>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">RUNYA CRYSTAL</p>
+          <h1>润雅水晶内部报价计算器</h1>
+        </div>
+        <div class="staff-card" aria-label="当前员工">
+          <span>当前版本</span>
+          <strong>静态离线版</strong>
+          <span>当前员工</span>
+          <select id="activeEmployee"></select>
+          <button id="lockButton" class="ghost-button" type="button">锁定</button>
+        </div>
+      </header>
+
+      <div class="notice">
+        <strong>润雅水晶内部报价系统</strong>
+        <span>仅限公司员工使用，请勿外传</span>
+      </div>
+
+      <div class="mode-grid" aria-label="报价模式">
+        <button class="mode-card active" data-mode="kg" type="button">
+          <span>KG重量报价</span>
+          <small>适合碎石、晶簇、大件摆件</small>
+        </button>
+        <button class="mode-card" data-mode="g" type="button">
+          <span>g重量报价</span>
+          <small>适合手链、散珠、小件材料</small>
+        </button>
+        <button class="mode-card" data-mode="unit" type="button">
+          <span>按个报价</span>
+          <small>适合发财树、套盒、成品</small>
+        </button>
+        <button class="mode-card" data-mode="bead" type="button">
+          <span>单珠计价</span>
+          <small>按材质密度、珠径和颗数估算单颗售价</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="calculator-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">QUOTE BUILDER</p>
+            <h2 id="modeTitle">KG重量报价</h2>
+          </div>
+          <button id="clearButton" class="ghost-button" type="button">清空</button>
+        </div>
+
+        <div class="form-grid">
+          <label>产品名称
+            <input id="productName" placeholder="例如：紫水晶碎石">
+          </label>
+
+          <label>产品分类
+            <select id="category"></select>
+          </label>
+
+          <div class="image-uploader">
+            <div>
+              <span>产品图片</span>
+              <small>用于历史报价和打印报价单</small>
+            </div>
+            <img id="imagePreview" alt="产品预览" hidden>
+            <div id="imagePlaceholder" class="image-placeholder">水晶图片</div>
+            <div class="image-actions">
+              <label class="upload-button">插入图片
+                <input id="imageInput" accept="image/*" type="file">
+              </label>
+              <button id="removeImageButton" type="button">移除</button>
+            </div>
+          </div>
+
+          <label id="purchaseLabel">采购成本
+            <div class="input-with-unit">
+              <input id="purchase" inputmode="decimal" placeholder="0.00">
+              <span id="purchaseUnit">元/kg</span>
+            </div>
+          </label>
+
+          <label id="weightField">重量
+            <div class="input-with-unit">
+              <input id="weight" inputmode="decimal" placeholder="0">
+              <span id="weightUnit">kg</span>
+            </div>
+          </label>
+
+          <label id="quantityField" hidden>数量
+            <div class="input-with-unit">
+              <input id="quantity" inputmode="decimal" placeholder="1">
+              <span id="quantityUnit">个</span>
+            </div>
+          </label>
+
+          <div id="beadPanel" class="bead-panel" hidden>
+            <div class="bead-head">
+              <div>
+                <span>单珠材质</span>
+                <strong id="selectedMaterialName">白水晶</strong>
+              </div>
+              <small id="selectedMaterialDensity">密度 2.65 g/cm3</small>
+            </div>
+            <input id="materialSearch" placeholder="搜索材质，如：紫水晶、黄水晶">
+            <div id="materialList" class="material-list"></div>
+            <div class="bead-inputs">
+              <label>珠子直径
+                <div class="input-with-unit">
+                  <input id="diameter" inputmode="decimal" placeholder="8">
+                  <span>mm</span>
+                </div>
+              </label>
+              <label>珠子数量
+                <div class="input-with-unit">
+                  <input id="beadQuantity" inputmode="decimal" placeholder="16">
+                  <span>颗</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <label id="lossField">损耗比例
+            <div class="input-with-unit">
+              <input id="lossRate" inputmode="decimal" placeholder="0">
+              <span>%</span>
+            </div>
+          </label>
+
+          <label>包装成本
+            <div class="input-with-unit">
+              <input id="packaging" inputmode="decimal" placeholder="0">
+              <span>元</span>
+            </div>
+          </label>
+
+          <label>人工成本
+            <div class="input-with-unit">
+              <input id="labor" inputmode="decimal" placeholder="0">
+              <span>元</span>
+            </div>
+          </label>
+
+          <label>利润率
+            <div class="input-with-unit">
+              <input id="profitRate" inputmode="decimal" placeholder="35">
+              <span>%</span>
+            </div>
+          </label>
+        </div>
+
+        <div id="templateStrip" class="template-strip" aria-label="快速报价模板"></div>
+      </div>
+
+      <aside class="summary-panel">
+        <div class="summary-top">
+          <p class="eyebrow">INTERNAL PRICE</p>
+          <h2 id="quoteTotal">¥0.00</h2>
+          <span>最终员工报价</span>
+        </div>
+
+        <div id="breakdown" class="breakdown"></div>
+
+        <div class="action-row">
+          <button id="saveButton" class="primary-button" type="button">保存报价</button>
+          <button id="printButton" class="secondary-button" type="button">打印报价单</button>
+        </div>
+        <p id="savedHint" class="status-hint"></p>
+      </aside>
+    </section>
+
+    <section class="management-grid">
+      <div class="utility-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">CATEGORY</p>
+            <h2>产品分类管理</h2>
+          </div>
+        </div>
+        <form id="categoryForm" class="inline-form">
+          <input id="newCategory" placeholder="新增分类名称">
+          <button type="submit">新增</button>
+        </form>
+        <div id="categoryChips" class="chips"></div>
+      </div>
+
+      <div class="utility-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">STAFF</p>
+            <h2>员工本地名单</h2>
+          </div>
+        </div>
+        <form id="employeeForm" class="inline-form">
+          <input id="newEmployee" placeholder="新增员工姓名">
+          <button type="submit">新增</button>
+        </form>
+        <div id="employeeList" class="employee-list"></div>
+      </div>
+    </section>
+
+    <section class="records-section">
+      <div class="records-toolbar">
+        <div>
+          <p class="eyebrow">HISTORY</p>
+          <h2>历史报价记录</h2>
+        </div>
+        <div class="toolbar-actions">
+          <input id="search" placeholder="搜索产品、分类、日期">
+          <button id="exportButton" type="button">导出Excel</button>
+        </div>
+      </div>
+
+      <div class="record-table" role="table" aria-label="报价记录">
+        <div class="record-head" role="row">
+          <span>日期</span>
+          <span>产品名称</span>
+          <span>计价方式</span>
+          <span>成本</span>
+          <span>报价</span>
+          <span>利润率</span>
+          <span>操作</span>
+        </div>
+        <div id="recordRows"></div>
+      </div>
+    </section>
+
+    <section id="quoteDetail" class="quote-detail print-area" aria-label="报价单详情"></section>
+  </main>
+
+  <script>
+    const ADMIN_ACCESS_CODE = "RUNYA2026";
+    const DEFAULT_CATEGORIES = ["天然水晶手链", "水晶发财树", "水晶摆件", "矿石标本", "矿物标本套盒", "香薰扩香石", "其他产品"];
+    const DEFAULT_EMPLOYEES = [{ id: "owner", name: "内部员工", role: "报价员" }];
+    const MATERIALS = [
+      {name:"白水晶",density:2.65},{name:"紫水晶",density:2.65},{name:"黄水晶",density:2.65},{name:"紫黄晶",density:2.65},
+      {name:"茶晶",density:2.65},{name:"墨晶",density:2.65},{name:"普通粉晶",density:2.65},{name:"马粉",density:2.65},
+      {name:"星光粉晶",density:2.65},{name:"金发晶",density:2.65},{name:"钛晶",density:2.65},{name:"黑发晶",density:2.65},
+      {name:"银发晶",density:2.65},{name:"铜发晶",density:2.65},{name:"绿发晶",density:2.65},{name:"蓝发晶",density:2.65},
+      {name:"彩发晶",density:2.65},{name:"红兔毛",density:2.65},{name:"白兔毛",density:2.65},{name:"金兔毛",density:2.65},
+      {name:"绿兔毛",density:2.65},{name:"粉兔毛",density:2.65},{name:"彩兔毛",density:2.65},{name:"绿幽灵",density:2.65},
+      {name:"红胶花",density:2.58},{name:"芬达胶花",density:2.58},{name:"超七",density:2.65},{name:"极光",density:2.65},
+      {name:"紫锂辉",density:3.1},{name:"葡萄石",density:2.9},{name:"萤石",density:3.18},{name:"彩虹水晶",density:2.65},
+      {name:"红玛瑙",density:2.6},{name:"黑玛瑙",density:2.6},{name:"白玛瑙",density:2.6},{name:"灰玛瑙",density:2.6},
+      {name:"蓝纹玛瑙",density:2.6},{name:"花玛瑙",density:2.6},{name:"战国红",density:2.6},{name:"南红",density:2.6},
+      {name:"盐源玛瑙",density:2.6},{name:"蓝玉髓",density:2.58},{name:"白玉髓",density:2.58},{name:"海洋玉髓",density:2.58},
+      {name:"水草玛瑙",density:2.6},{name:"樱花玛瑙",density:2.6},{name:"白月光石",density:2.56},{name:"灰月光石",density:2.56},
+      {name:"拉长石",density:2.56},{name:"太阳石",density:2.65},{name:"黄虎眼",density:2.64},{name:"红虎眼",density:2.64},
+      {name:"蓝虎眼",density:2.64},{name:"彩虎眼",density:2.64},{name:"海蓝宝",density:2.7},{name:"蓝纹石",density:2.7},
+      {name:"青金石",density:2.4},{name:"方钠石",density:2.3},{name:"绿东陵",density:2.65},{name:"蓝东陵",density:2.65},
+      {name:"橄榄石",density:3.3},{name:"绿草莓晶",density:2.65},{name:"绿龙晶",density:2.65},{name:"草莓晶",density:2.65},
+      {name:"红纹石",density:2.9},{name:"酒红石榴石",density:3.8},{name:"芬达石榴石",density:3.8},{name:"蔷薇辉石",density:3.5},
+      {name:"彩虹碧玺",density:3.1},{name:"西瓜碧玺",density:3.1},{name:"黑曜石",density:2.35},{name:"金曜石",density:2.35},
+      {name:"银曜石",density:2.35},{name:"彩曜石",density:2.35},{name:"冰彩黑曜石",density:2.35},{name:"黑碧玺",density:3},
+      {name:"天河石",density:2.56},{name:"紫龙晶",density:2.65},{name:"舒俱来",density:2.9},{name:"方解石",density:2.71},
+      {name:"堇青石",density:2.58},{name:"孔雀石",density:3.6},{name:"红碧玉",density:2.65},{name:"黄玉",density:3.5},
+      {name:"托帕石",density:3.5}
+    ];
+    const TEMPLATES = [
+      { id:"rose-tree", name:"粉水晶发财树", category:"水晶发财树", mode:"unit", purchase:88, weight:0, quantity:1, lossRate:0, packaging:12, labor:18, profitRate:45 },
+      { id:"amethyst-tree", name:"紫水晶发财树", category:"水晶发财树", mode:"unit", purchase:108, weight:0, quantity:1, lossRate:0, packaging:14, labor:20, profitRate:48 },
+      { id:"clear-cluster", name:"白水晶簇", category:"水晶摆件", mode:"kg", purchase:96, weight:1.2, quantity:1, lossRate:6, packaging:10, labor:8, profitRate:42 },
+      { id:"mineral-box", name:"矿石标本套盒", category:"矿物标本套盒", mode:"unit", purchase:56, weight:0, quantity:10, lossRate:0, packaging:18, labor:12, profitRate:38 },
+      { id:"bracelet", name:"水晶手链", category:"天然水晶手链", mode:"g", purchase:1.8, weight:32, quantity:1, lossRate:5, packaging:6, labor:8, profitRate:55 },
+      { id:"clear-beads", name:"白水晶单珠手串", category:"天然水晶手链", mode:"bead", purchase:1.8, weight:0, quantity:16, material:"白水晶", diameter:8, lossRate:5, packaging:6, labor:8, profitRate:55 }
+    ];
+    const storage = {
+      auth: "runya-static-admin-authorized",
+      categories: "runya-static-categories",
+      employees: "runya-static-employees",
+      activeEmployee: "runya-static-active-employee",
+      records: "runya-static-records"
+    };
+
+    const state = {
+      mode: "kg",
+      input: {
+        productName: "", category: DEFAULT_CATEGORIES[0], image: "", purchase: "",
+        weight: "", quantity: "1", material: "白水晶", diameter: "8",
+        lossRate: "0", packaging: "0", labor: "0", profitRate: "35"
+      },
+      categories: read(storage.categories, DEFAULT_CATEGORIES),
+      employees: read(storage.employees, DEFAULT_EMPLOYEES),
+      activeEmployee: read(storage.activeEmployee, "owner"),
+      records: read(storage.records, []),
+      selectedRecord: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const money = (value) => new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", minimumFractionDigits: 2 }).format(Number.isFinite(value) ? value : 0);
+    const num = (value) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+    };
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
+    const id = () => (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : String(Date.now() + Math.random()));
+
+    function read(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function write(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function modeLabel(mode) {
+      if (mode === "kg") return "KG重量报价";
+      if (mode === "g") return "g重量报价";
+      if (mode === "bead") return "单珠计价";
+      return "按个报价";
+    }
+
+    function modeUnit(mode) {
+      if (mode === "kg") return "元/kg";
+      if (mode === "g" || mode === "bead") return "元/g";
+      return "元/个";
+    }
+
+    function getMaterial() {
+      return MATERIALS.find((item) => item.name === state.input.material) || MATERIALS[0];
+    }
+
+    function calculate() {
+      const purchase = num(state.input.purchase);
+      const material = getMaterial();
+      const beadCount = num(state.input.quantity) || 1;
+      const diameter = num(state.input.diameter);
+      const radiusCM = diameter / 20;
+      const singleBeadWeight = state.mode === "bead" && radiusCM > 0
+        ? (4 / 3) * Math.PI * Math.pow(radiusCM, 3) * material.density
+        : 0;
+      const totalBeadWeight = singleBeadWeight * beadCount;
+      const weight = state.mode === "unit" ? 0 : state.mode === "bead" ? totalBeadWeight : num(state.input.weight);
+      const quantity = state.mode === "unit" || state.mode === "bead" ? beadCount : 1;
+      const lossRate = num(state.input.lossRate);
+      const packaging = num(state.input.packaging);
+      const labor = num(state.input.labor);
+      const profitRate = num(state.input.profitRate);
+      const purchaseAmount = state.mode === "unit" ? purchase * quantity : purchase * weight;
+      const lossCost = state.mode === "unit" ? 0 : purchaseAmount * (lossRate / 100);
+      const productCost = purchaseAmount + lossCost + packaging + labor;
+      const quoteTotal = productCost * (1 + profitRate / 100);
+      const unitPrice = state.mode === "unit" || state.mode === "bead" ? quoteTotal / Math.max(quantity, 1) : quoteTotal;
+      return { purchaseAmount, lossCost, packagingCost: packaging, laborCost: labor, productCost, quoteTotal, unitPrice, grossProfit: quoteTotal - productCost, singleBeadWeight, totalBeadWeight };
+    }
+
+    function bindInput(idName, field) {
+      $(idName).addEventListener("input", (event) => {
+        state.input[field] = event.target.value;
+        render();
+      });
+    }
+
+    function renderAuth() {
+      const authorized = read(storage.auth, false);
+      $("authScreen").classList.toggle("hidden", authorized);
+      $("app").classList.toggle("unlocked", authorized);
+      if (authorized) render();
+    }
+
+    function render() {
+      renderMode();
+      renderInputs();
+      renderMaterials();
+      renderSummary();
+      renderCategories();
+      renderEmployees();
+      renderRecords();
+      renderDetail();
+      write(storage.categories, state.categories);
+      write(storage.employees, state.employees);
+      write(storage.activeEmployee, state.activeEmployee);
+      write(storage.records, state.records);
+    }
+
+    function renderMode() {
+      document.querySelectorAll(".mode-card").forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === state.mode);
+      });
+      $("modeTitle").textContent = modeLabel(state.mode);
+      $("purchaseLabel").firstChild.textContent = state.mode === "unit" ? "采购单价" : state.mode === "bead" ? "材料克价" : "采购成本";
+      $("purchaseUnit").textContent = modeUnit(state.mode);
+      $("weightField").hidden = state.mode === "unit" || state.mode === "bead";
+      $("quantityField").hidden = state.mode !== "unit";
+      $("beadPanel").hidden = state.mode !== "bead";
+      $("lossField").hidden = state.mode === "unit";
+      $("weightUnit").textContent = state.mode === "kg" ? "kg" : "g";
+      $("quantityUnit").textContent = "个";
+      $("productName").placeholder = state.mode === "kg" ? "例如：紫水晶碎石" : state.mode === "bead" ? "例如：白水晶8mm手串" : "例如：粉水晶发财树";
+    }
+
+    function renderInputs() {
+      for (const [key, value] of Object.entries(state.input)) {
+        const element = $(key);
+        if (element) element.value = value;
+      }
+      $("beadQuantity").value = state.input.quantity;
+      const preview = $("imagePreview");
+      const placeholder = $("imagePlaceholder");
+      preview.hidden = !state.input.image;
+      placeholder.hidden = !!state.input.image;
+      if (state.input.image) preview.src = state.input.image;
+    }
+
+    function renderMaterials() {
+      const material = getMaterial();
+      $("selectedMaterialName").textContent = material.name;
+      $("selectedMaterialDensity").textContent = `密度 ${material.density} g/cm3`;
+      const keyword = $("materialSearch").value.trim().toLowerCase();
+      const list = MATERIALS.filter((item) => !keyword || item.name.toLowerCase().includes(keyword));
+      $("materialList").innerHTML = (list.length ? list : MATERIALS).map((item) => `
+        <button class="${item.name === state.input.material ? "selected" : ""}" data-material="${escapeHtml(item.name)}" type="button">${escapeHtml(item.name)}</button>
+      `).join("");
+    }
+
+    function renderSummary() {
+      const result = calculate();
+      $("quoteTotal").textContent = money(result.quoteTotal);
+      const rows = [];
+      rows.push([state.mode === "unit" ? "采购金额" : state.mode === "bead" ? "珠子材料金额" : "采购成本金额", money(result.purchaseAmount)]);
+      if (state.mode === "bead") {
+        rows.push(["单颗重量", `${result.singleBeadWeight.toFixed(3)} g`]);
+        rows.push(["整串重量", `${result.totalBeadWeight.toFixed(2)} g`]);
+      }
+      if (state.mode !== "unit") rows.push(["损耗成本", money(result.lossCost)]);
+      rows.push(["包装成本", money(result.packagingCost)]);
+      rows.push(["人工成本", money(result.laborCost)]);
+      rows.push(["产品成本", money(result.productCost), "total-line"]);
+      if (state.mode === "unit" || state.mode === "bead") rows.push([state.mode === "bead" ? "单颗售价" : "单个售价", money(result.unitPrice), "total-line soft"]);
+      rows.push(["预估毛利", money(result.grossProfit)]);
+      $("breakdown").innerHTML = rows.map(([label, value, className]) => `<div class="${className || ""}"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    }
+
+    function renderCategories() {
+      $("category").innerHTML = state.categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+      $("category").value = state.input.category;
+      $("categoryChips").innerHTML = state.categories.map((category) => `
+        <span class="chip">${escapeHtml(category)} <button data-remove-category="${escapeHtml(category)}" type="button" aria-label="删除${escapeHtml(category)}">x</button></span>
+      `).join("");
+    }
+
+    function renderEmployees() {
+      $("activeEmployee").innerHTML = state.employees.map((employee) => `<option value="${escapeHtml(employee.id)}">${escapeHtml(employee.name)}</option>`).join("");
+      $("activeEmployee").value = state.activeEmployee;
+      $("employeeList").innerHTML = state.employees.map((employee) => `
+        <div><span>${escapeHtml(employee.name)}</span><small>${escapeHtml(employee.role)}</small><button data-remove-employee="${escapeHtml(employee.id)}" type="button">删除</button></div>
+      `).join("");
+    }
+
+    function renderRecords() {
+      const keyword = $("search").value.trim().toLowerCase();
+      const filtered = keyword ? state.records.filter((record) => [record.productName, record.category, modeLabel(record.mode), record.date].join(" ").toLowerCase().includes(keyword)) : state.records;
+      $("exportButton").disabled = !state.records.length;
+      $("recordRows").innerHTML = filtered.length ? filtered.map((record) => `
+        <div class="record-row" role="row">
+          <span>${escapeHtml(record.date)}</span>
+          <strong>${escapeHtml(record.productName)}</strong>
+          <span>${modeLabel(record.mode)}</span>
+          <span>${money(record.productCost)}</span>
+          <strong>${money(record.quoteTotal)}</strong>
+          <span>${record.profitRate}%</span>
+          <div class="row-actions">
+            <button data-view="${record.id}" type="button">查看</button>
+            <button data-print="${record.id}" type="button">打印</button>
+            <button data-delete="${record.id}" type="button">删除</button>
+          </div>
+        </div>
+      `).join("") : `<div class="empty-state">暂无报价记录。保存一次报价后会自动出现在这里。</div>`;
+    }
+
+    function renderDetail() {
+      const record = state.selectedRecord;
+      const box = $("quoteDetail");
+      box.classList.toggle("active", !!record);
+      if (!record) {
+        box.innerHTML = "";
+        return;
+      }
+      const active = state.employees.find((employee) => employee.id === state.activeEmployee) || DEFAULT_EMPLOYEES[0];
+      const beadRows = record.mode === "bead" ? `
+        <span>珠子材质</span><strong>${escapeHtml(record.material || "")}</strong>
+        <span>珠子直径</span><strong>${record.diameter || 0} mm</strong>
+        <span>单颗重量</span><strong>${(record.singleBeadWeight || 0).toFixed(3)} g</strong>
+        <span>整串重量</span><strong>${(record.totalBeadWeight || 0).toFixed(2)} g</strong>
+      ` : "";
+      box.innerHTML = `
+        <div class="detail-head">
+          <div><p class="eyebrow">RUNYA QUOTATION</p><h2>润雅水晶报价单</h2></div>
+          <button id="closeDetailButton" type="button">关闭</button>
+        </div>
+        <div class="detail-grid">
+          ${record.image ? `<span>产品图片</span><img class="detail-image" src="${record.image}" alt="${escapeHtml(record.productName)}">` : ""}
+          <span>报价员工</span><strong>${escapeHtml(active.name)}</strong>
+          <span>报价日期</span><strong>${escapeHtml(record.date)}</strong>
+          <span>产品名称</span><strong>${escapeHtml(record.productName)}</strong>
+          <span>产品分类</span><strong>${escapeHtml(record.category)}</strong>
+          <span>计价方式</span><strong>${modeLabel(record.mode)}</strong>
+          ${beadRows}
+          <span>产品成本</span><strong>${money(record.productCost)}</strong>
+          <span>最终报价</span><strong>${money(record.quoteTotal)}</strong>
+          <span>${record.mode === "bead" ? "单颗售价" : "单个售价"}</span><strong>${money(record.unitPrice)}</strong>
+        </div>
+      `;
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      state.input.quantity = mode === "unit" ? state.input.quantity || "1" : mode === "bead" ? state.input.quantity || "16" : "1";
+      if (mode === "unit" || mode === "bead") state.input.weight = "";
+      if (mode === "bead") state.input.diameter = state.input.diameter || "8";
+      $("savedHint").textContent = "";
+      render();
+    }
+
+    function applyTemplate(template) {
+      state.mode = template.mode;
+      state.input = {
+        productName: template.name, category: template.category, image: "",
+        purchase: String(template.purchase), weight: template.weight ? String(template.weight) : "",
+        quantity: String(template.quantity), material: template.material || "白水晶",
+        diameter: template.diameter ? String(template.diameter) : "8",
+        lossRate: String(template.lossRate), packaging: String(template.packaging),
+        labor: String(template.labor), profitRate: String(template.profitRate)
+      };
+      $("savedHint").textContent = `已填入「${template.name}」模板`;
+      render();
+    }
+
+    function currentRecord(preview = false) {
+      const result = calculate();
+      const productName = state.input.productName.trim() || (state.mode === "bead" ? `${state.input.material}${state.input.diameter || "0"}mm单珠报价` : "");
+      if (!preview && !productName) return { error: "请先填写产品名称" };
+      if (!num(state.input.purchase)) return { error: "请先填写采购价格" };
+      if (state.mode === "bead" && !num(state.input.diameter)) return { error: "请先填写珠子直径" };
+      if (state.mode !== "unit" && state.mode !== "bead" && !num(state.input.weight)) return { error: "请先填写重量" };
+      return {
+        ...result,
+        id: preview ? "preview" : id(),
+        date: new Date().toLocaleString("zh-CN", { hour12: false }),
+        productName: productName || "未命名产品",
+        category: state.input.category,
+        image: state.input.image,
+        mode: state.mode,
+        profitRate: num(state.input.profitRate),
+        quantity: state.mode === "unit" || state.mode === "bead" ? num(state.input.quantity) || 1 : 1,
+        weight: state.mode === "unit" ? 0 : state.mode === "bead" ? result.totalBeadWeight : num(state.input.weight),
+        material: state.mode === "bead" ? state.input.material : undefined,
+        diameter: state.mode === "bead" ? num(state.input.diameter) : undefined,
+        singleBeadWeight: state.mode === "bead" ? result.singleBeadWeight : undefined,
+        totalBeadWeight: state.mode === "bead" ? result.totalBeadWeight : undefined
+      };
+    }
+
+    function saveQuote() {
+      const record = currentRecord(false);
+      if (record.error) {
+        $("savedHint").textContent = record.error;
+        return;
+      }
+      state.records = [record, ...state.records].slice(0, 300);
+      state.selectedRecord = record;
+      $("savedHint").textContent = "报价已保存到历史记录";
+      render();
+    }
+
+    function printQuote(record) {
+      state.selectedRecord = record || currentRecord(true);
+      if (state.selectedRecord.error) {
+        $("savedHint").textContent = state.selectedRecord.error;
+        return;
+      }
+      render();
+      setTimeout(() => window.print(), 30);
+    }
+
+    function exportExcel() {
+      const headers = ["日期", "产品名称", "分类", "计价方式", "成本", "报价", "单价", "利润率", "材质", "珠径", "单颗重量", "总重量"];
+      const rows = state.records.map((record) => [
+        record.date, record.productName, record.category, modeLabel(record.mode),
+        record.productCost.toFixed(2), record.quoteTotal.toFixed(2), record.unitPrice.toFixed(2),
+        `${record.profitRate}%`, record.material || "", record.diameter || "",
+        record.singleBeadWeight ? record.singleBeadWeight.toFixed(3) : "",
+        record.totalBeadWeight ? record.totalBeadWeight.toFixed(2) : ""
+      ]);
+      const table = [headers, ...rows].map((row) => `<tr>${row.map((cell) => `<td style="border:1px solid #d8d0c2;padding:8px;">${escapeHtml(cell)}</td>`).join("")}</tr>`).join("");
+      const html = `\uFEFF<html><head><meta charset="utf-8"></head><body><table>${table}</table></body></html>`;
+      const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `润雅水晶报价记录-${new Date().toISOString().slice(0, 10)}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function wire() {
+      $("authForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if ($("adminCode").value.trim() !== ADMIN_ACCESS_CODE) {
+          $("adminHint").textContent = "授权码不正确，请联系管理员确认。";
+          return;
+        }
+        write(storage.auth, true);
+        $("adminCode").value = "";
+        $("adminHint").textContent = "";
+        renderAuth();
+      });
+
+      $("lockButton").addEventListener("click", () => {
+        localStorage.removeItem(storage.auth);
+        renderAuth();
+      });
+
+      document.querySelectorAll(".mode-card").forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode)));
+      TEMPLATES.forEach((template) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = template.name;
+        button.addEventListener("click", () => applyTemplate(template));
+        $("templateStrip").appendChild(button);
+      });
+
+      ["productName","purchase","weight","quantity","diameter","lossRate","packaging","labor","profitRate"].forEach((field) => bindInput(field, field));
+      $("beadQuantity").addEventListener("input", (event) => {
+        state.input.quantity = event.target.value;
+        render();
+      });
+      $("category").addEventListener("change", (event) => {
+        state.input.category = event.target.value;
+        render();
+      });
+      $("activeEmployee").addEventListener("change", (event) => {
+        state.activeEmployee = event.target.value;
+        render();
+      });
+      $("materialSearch").addEventListener("input", renderMaterials);
+      $("materialList").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-material]");
+        if (!button) return;
+        state.input.material = button.dataset.material;
+        render();
+      });
+      $("imageInput").addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            state.input.image = reader.result;
+            render();
+          }
+        };
+        reader.readAsDataURL(file);
+        event.target.value = "";
+      });
+      $("removeImageButton").addEventListener("click", () => {
+        state.input.image = "";
+        render();
+      });
+      $("clearButton").addEventListener("click", () => {
+        state.input = { productName:"", category:DEFAULT_CATEGORIES[0], image:"", purchase:"", weight:"", quantity:"1", material:"白水晶", diameter:"8", lossRate:"0", packaging:"0", labor:"0", profitRate:"35" };
+        render();
+      });
+      $("saveButton").addEventListener("click", saveQuote);
+      $("printButton").addEventListener("click", () => printQuote());
+      $("exportButton").addEventListener("click", exportExcel);
+      $("search").addEventListener("input", renderRecords);
+
+      $("categoryForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = $("newCategory").value.trim();
+        if (!value || state.categories.includes(value)) return;
+        state.categories.push(value);
+        state.input.category = value;
+        $("newCategory").value = "";
+        render();
+      });
+      $("categoryChips").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-remove-category]");
+        if (!button) return;
+        state.categories = state.categories.filter((item) => item !== button.dataset.removeCategory);
+        if (!state.categories.length) state.categories = DEFAULT_CATEGORIES.slice();
+        if (!state.categories.includes(state.input.category)) state.input.category = state.categories[0];
+        render();
+      });
+      $("employeeForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = $("newEmployee").value.trim();
+        if (!name) return;
+        const employee = { id: id(), name, role: "报价员" };
+        state.employees.push(employee);
+        state.activeEmployee = employee.id;
+        $("newEmployee").value = "";
+        render();
+      });
+      $("employeeList").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-remove-employee]");
+        if (!button) return;
+        state.employees = state.employees.filter((employee) => employee.id !== button.dataset.removeEmployee);
+        if (!state.employees.length) state.employees = DEFAULT_EMPLOYEES.slice();
+        if (!state.employees.some((employee) => employee.id === state.activeEmployee)) state.activeEmployee = state.employees[0].id;
+        render();
+      });
+      $("recordRows").addEventListener("click", (event) => {
+        const view = event.target.closest("[data-view]");
+        const print = event.target.closest("[data-print]");
+        const del = event.target.closest("[data-delete]");
+        const target = view || print || del;
+        if (!target) return;
+        const record = state.records.find((item) => item.id === target.dataset.view || item.id === target.dataset.print || item.id === target.dataset.delete);
+        if (!record) return;
+        if (view) state.selectedRecord = record;
+        if (print) printQuote(record);
+        if (del) {
+          state.records = state.records.filter((item) => item.id !== record.id);
+          if (state.selectedRecord && state.selectedRecord.id === record.id) state.selectedRecord = null;
+        }
+        render();
+      });
+      $("quoteDetail").addEventListener("click", (event) => {
+        if (event.target.id === "closeDetailButton") {
+          state.selectedRecord = null;
+          render();
+        }
+      });
+    }
+
+    wire();
+    renderAuth();
+  </script>
+</body>
+</html>
